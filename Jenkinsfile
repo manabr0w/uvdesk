@@ -41,6 +41,16 @@ pipeline {
             }
         }
 
+        stage("Install linter") {
+            steps {
+                sh '''
+                if ! command -v phpcs > /dev/null; then
+                    composer global require squizlabs/php_codesniffer
+                fi
+                '''
+            }
+        }
+
         stage("Testing") {
             steps {
                 sh '''
@@ -49,11 +59,28 @@ pipeline {
                 '''
             }
         }
+
+        stage("Running linter") {
+            steps {
+                sh '''
+                echo "Running PHP_CodeSniffer..."
+                phpcs --standard=PSR12 src/
+                '''
+            }
+        }
     }
 
     post{
+        always {
+            echo "Pipline finidhed"
+        }
+
         success {
             echo "CI finished succesfull"
+        }
+
+        failed {
+            echo "CI failed"
         }
     }
 }
