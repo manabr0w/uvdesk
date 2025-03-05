@@ -9,7 +9,7 @@ pipeline {
     stages{
         stage("Checkout") {
             steps {
-                git branch: 'main', url: 'https://github.com/manabr0w/uvdesk.git'
+                git branch: 'main', url: 'https://github.com/manabr0w/uvdesk'
                 credentialsId: 'github-token'
             }
 
