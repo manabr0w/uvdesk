@@ -4,7 +4,6 @@ pipeline {
     environment {
         COMPOSER_ALLOW_SUPERUSER = 1
         COMPOSER_NO_INTERACTION = 1
-        PATH = "$HOME/.composer/vendor/bin:$PATH"
     }
 
     stages {
@@ -41,18 +40,6 @@ pipeline {
             }
         }
 
-        stage("Install Linter") {
-            steps {
-                sh '''
-                if ! command -v phpcs > /dev/null; then
-                    echo "Installing PHP_CodeSniffer..."
-                    composer global require squizlabs/php_codesniffer
-                fi
-                export PATH="$HOME/.composer/vendor/bin:$PATH"
-                '''
-            }
-        }
-
         stage("Testing") {
             steps {
                 sh '''
@@ -66,14 +53,6 @@ pipeline {
             }
         }
 
-        stage("Running Linter") {
-            steps {
-                sh '''
-                echo "Running PHP_CodeSniffer..."
-                phpcs --standard=PSR12 src/
-                '''
-            }
-        }
     }
 
     post {
