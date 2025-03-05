@@ -6,14 +6,15 @@ pipeline {
         COMPOSER_NO_INTERACTION = 1
     }
 
-    stages {
+    stages{
         stage("Checkout") {
             steps {
                 git branch: 'main', url: 'https://github.com/manabr0w/uvdesk.git'
             }
+
         }
 
-        stage("Setup Environment") {
+        stage("Setup envirement") {
             steps {
                 sh '''
                 echo "Checking PHP and Composer..."
@@ -31,7 +32,7 @@ pipeline {
             }
         }
 
-        stage("Install Dependencies") {
+        stage("Install dependencies") {
             steps {
                 sh '''
                 echo "Installing dependencies..."
@@ -40,28 +41,42 @@ pipeline {
             }
         }
 
-        stage("Testing") {
+        stage("Install linter") {
             steps {
                 sh '''
-                echo "Running tests..."
-                if [ -d "tests" ]; then
-                    vendor/bin/phpunit tests/
-                else
-                    vendor/bin/phpunit
+                if ! command -v phpcs > /dev/null; then
+                    composer global require squizlabs/php_codesniffer
                 fi
                 '''
             }
         }
 
+        stage("Testing") {
+            steps {
+                sh '''
+                echo "Running tests..."
+                vendor/bin/phpunit tests/
+                '''
+            }
+        }
+
+        stage("Running linter") {
+            steps {
+                sh '''
+                echo "Running PHP_CodeSniffer..."
+                phpcs --standard=PSR12 src/
+                '''
+            }
+        }
     }
 
-    post {
+    post{
         always {
-            echo "Pipeline finished"
+            echo "Pipline finished"
         }
 
         success {
-            echo "CI finished successfully"
+            echo "CI finished succesfull"
         }
 
         failure {
