@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'php:8.1'
-            args '--user=root'
-        }
-    }
+    agent any
 
     environment {
         COMPOSER_ALLOW_SUPERUSER = 1
@@ -27,13 +22,13 @@ pipeline {
                 echo "Checking PHP and Composer..."
                 if ! command -v php > /dev/null; then
                     echo "Installing PHP..."
-                    apt update && apt install -y php php-cli php-mbstring unzip curl
+                    sudo apt update && sudo apt install -y php php-cli php-mbstring unzip curl
                 fi
 
                 if ! command -v composer > /dev/null; then
                     echo "Installing Composer..."
                     curl -sS https://getcomposer.org/installer | php
-                    mv composer.phar /usr/local/bin/composer
+                    sudo mv composer.phar /usr/local/bin/composer
                 fi
                 '''
             }
