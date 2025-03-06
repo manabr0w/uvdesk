@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'php:8.1'
+            args '--user=root'
+        }
+    }
 
     environment {
         COMPOSER_ALLOW_SUPERUSER = 1
