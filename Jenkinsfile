@@ -62,7 +62,7 @@ pipeline {
         }
 
         failure {
-            echo "CI failed"
+            echo "CI failed succesfull"
         }
     }
 }
