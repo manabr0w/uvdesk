@@ -52,41 +52,6 @@ pipeline {
             }
         }
 
-        stage("Create GitHub Release") {
-            steps {
-                script {
-                    def latestTag = sh(script: "git describe --tags --abbrev=0 || echo v0.0.0", returnStdout: true).trim()
-                    def newVersion = latestTag.replaceAll("v", "").tokenize('.').collect{ it as int }
-                    newVersion[-1] += 1
-                    def newTag = "v${newVersion.join('.')}"
-
-                    echo "Latest tag: ${latestTag}"
-                    echo "New tag: ${newTag}"
-
-                    sh "git tag ${newTag}"
-                    sh "git push origin ${newTag}"
-
-                    def releaseData = """
-                    {
-                        "tag_name": "${newTag}",
-                        "target_commitish": "main",
-                        "name": "${newTag}",
-                        "body": "Release ${newTag}",
-                        "draft": false,
-                        "prerelease": false
-                    }
-                    """
-
-                    sh """
-                    curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
-                         -H "Accept: application/vnd.github.v3+json" \
-                         https://api.github.com/repos/${GITHUB_REPO}/releases \
-                         -d '${releaseData}'
-                    """
-                }
-            }
-        }
-
     }
 
     post{
@@ -99,7 +64,7 @@ pipeline {
         }
 
         failure {
-            echo "CI failed succesfull  "
+            echo "CI failed"
         }
     }
 }
