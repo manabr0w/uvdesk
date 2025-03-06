@@ -27,13 +27,13 @@ pipeline {
                 echo "Checking PHP and Composer..."
                 if ! command -v php > /dev/null; then
                     echo "Installing PHP..."
-                    sudo apt update && sudo apt install -y php php-cli php-mbstring unzip curl
+                    apt update && apt install -y php php-cli php-mbstring unzip curl
                 fi
 
                 if ! command -v composer > /dev/null; then
                     echo "Installing Composer..."
                     curl -sS https://getcomposer.org/installer | php
-                    sudo mv composer.phar /usr/local/bin/composer
+                    mv composer.phar /usr/local/bin/composer
                 fi
                 '''
             }
