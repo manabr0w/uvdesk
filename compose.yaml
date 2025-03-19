@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   web:
     image: stableuvdesk
@@ -10,13 +8,12 @@ services:
       WEB_DB_USER: root
       WEB_DB_PASSWORD: "root"
       WEB_DB_NAME: uvdesk
+    networks:
+      virtnet:
+        ipv4_address: 192.167.1.3
     depends_on:
       - database
-    networks:
-      my_net:
-        ipv4_address: "192.168.1.3"
-  
-  
+
   database:
     image: mysql
     restart: always
@@ -26,14 +23,19 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./mysql:/var/lib/mysql
+      - mysqlyvdesk:/var/lib/mysql
     networks:
-      my_net:
-        ipv4_address: "192.168.1.4"
+      virtnet:
+        ipv4_address: 192.167.1.4
+
+volumes:
+  mysqlyvdesk:
+    external: false
 
 networks:
-  my_net:
+  virtnet:
+    driver: bridge
     ipam:
-      driver: default
       config:
-        - subnet: "192.168.1.0/27"
+        - subnet: 192.167.1.0/27
+          gateway: 192.167.1.1
