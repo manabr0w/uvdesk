@@ -38,7 +38,13 @@ RUN \
     chmod -R 777 /var/www/html/var \
                  /var/www/html/config \
                  /var/www/html/public \
-                 /var/www/html/migrations \
-                 /var/www/html/.env
+                 /var/www/html/migrations
+
+
+RUN \
+    chmod -R 777 /var/www/html/.env \
+                 /var/www/html/.env.dev \
+                 /var/www/html/.env.example \
+                 /var/www/html/.env.test
 
 CMD ["apachectl", "-D", "FOREGROUND"]

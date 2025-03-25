@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uvdesk-deploy
+  labels:
+    app: uvdesk
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: uvdesk
+  template:
+    metadata:
+      labels:
+        app: uvdesk
+    spec:
+      containers:
+      - name: uvdesk
+        image: maksfed31/uvdeskbeta:latest
+        ports: 
+        - containerPort: 80
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: uvdesk-service
+spec:
+  selector:
+    app: uvdesk
+  ports:
+  - port: 80
+    targetPort: 80
+  type: NodePort
