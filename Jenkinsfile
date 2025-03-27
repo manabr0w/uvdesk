@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'docker:24.0'
-            args '--privileged'
-        }
-    }
+    agent any
 
     environment {
         COMPOSER_ALLOW_SUPERUSER = 1
