@@ -45,10 +45,12 @@ pipeline {
 
         stage("Run Linter") {
             steps{
-                sh '''
+                dir('/var/www/html'){
+                   sh '''
                 echo "Running linter..."
-                bash -c "cd /var/www/html && vendor/bin/php-cs-fixer fix --dry-run --diff "
+                bash -c "vendor/bin/php-cs-fixer fix --dry-run --diff "
                 '''
+                }
             }
         }
 
