@@ -43,11 +43,29 @@ pipeline {
             }
         }
 
+        stage("Run Linter") {
+            steps{
+                sh '''
+                echo "Running linter..."
+                cd /var/www/html
+                vendor/bin/php-cs-fixer fix --dry-run --diff
+                '''
+            }
+        }
+
         stage("Testing") {
             steps {
                 sh '''
                 echo "Running tests..."
                 vendor/bin/phpunit tests/
+                '''
+            }
+        }
+
+        stage("Build docker file"){
+            steps {
+                sh '''
+                
                 '''
             }
         }
