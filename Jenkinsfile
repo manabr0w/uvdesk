@@ -5,31 +5,42 @@ pipeline {
         COMPOSER_ALLOW_SUPERUSER = 1
         COMPOSER_NO_INTERACTION = 1
         GITHUB_REPO = 'manabr0w/uvdesk'
-        GITHUB_TOKEN = credentials('GITHUB_TOKEN')
-        DOCKER_USER = credentials('DOCKERHUB_USERNAME')
-        DOCKER_PASS = credentials('DOCKERHUB_PASSWORD')
-        IMAGE_NAME = "manabr0w/uvdesk"
-        IMAGE_TAG = "latest"
+        DOCKER_CREDENTIALS = credentials('docker-hub-credentials')
+        IMAGE_NAME = 'your_dockerhub_username/uvdesk'
     }
 
     stages {
         stage("Checkout") {
             steps {
-                echo "Cloning repository..."
-                git branch: 'main', url: 'https://github.com/manabr0w/uvdesk', credentialsId: 'GITHUB_TOKEN'
+                git branch: 'main', url: "https://github.com/${GITHUB_REPO}.git", credentialsId: 'GITHUB_TOKEN'
             }
         }
 
-        stage("Setup environment") {
+        stage("Setup Environment") {
             steps {
                 sh '''
-                echo "Setting up PHP and Composer..."
-                apk add --no-cache php php-cli php-mbstring php-xml php-zip php-openssl php-phar curl bash
-                if ! command -v composer > /dev/null; then
-                    curl -sS https://getcomposer.org/installer | php
-                    mv composer.phar /usr/local/bin/composer
+                echo "Checking PHP and Composer..."
+
+                # Перевірка PHP
+                if ! command -v php > /dev/null; then
+                    echo "Installing PHP..."
+                    sudo apt-get update && sudo apt-get install -y php php-cli php-mbstring php-xml php-zip php-curl bash
                 fi
-                composer --version
+
+                # Перевірка Composer
+                if ! command -v composer > /dev/null; then
+                    echo "Installing Composer..."
+                    curl -sS https://getcomposer.org/installer | php
+                    sudo mv composer.phar /usr/local/bin/composer
+                fi
+
+                # Перевірка Docker
+                if ! command -v docker > /dev/null; then
+                    echo "Installing Docker..."
+                    sudo apt-get update && sudo apt-get install -y docker.io
+                    sudo systemctl start docker
+                    sudo systemctl enable docker
+                fi
                 '''
             }
         }
@@ -43,6 +54,15 @@ pipeline {
             }
         }
 
+        stage("Run Linter") {
+            steps {
+                sh '''
+                echo "Running linter..."
+                vendor/bin/php-cs-fixer fix --dry-run --diff
+                '''
+            }
+        }
+
         stage("Run Tests") {
             steps {
                 sh '''
@@ -52,29 +72,23 @@ pipeline {
             }
         }
 
-        stage("Docker Login") {
-            steps {
-                sh '''
-                echo "Logging in to DockerHub..."
-                echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                '''
-            }
-        }
-
         stage("Build Docker Image") {
             steps {
                 sh '''
-                echo "Building Docker Image..."
-                docker build -t $IMAGE_NAME:$IMAGE_TAG .
+                echo "Building Docker image..."
+                docker build -t ${IMAGE_NAME}:latest .
                 '''
             }
         }
 
-        stage("Push Docker Image") {
+        stage("Push to DockerHub") {
             steps {
                 sh '''
-                echo "Pushing Docker Image to DockerHub..."
-                docker push $IMAGE_NAME:$IMAGE_TAG
+                echo "Logging in to DockerHub..."
+                echo "${DOCKER_CREDENTIALS_USR}" | docker login -u "${DOCKER_CREDENTIALS_USR}" --password-stdin
+
+                echo "Pushing image to DockerHub..."
+                docker push ${IMAGE_NAME}:latest
                 '''
             }
         }
@@ -84,11 +98,13 @@ pipeline {
         always {
             echo "Pipeline execution completed."
         }
+
         success {
-            echo " Build and push succeeded!"
+            echo " Pipeline completed successfully!"
         }
+
         failure {
-            echo " Build failed. Check logs for errors."
+            echo " Pipeline failed!"
         }
     }
 }
