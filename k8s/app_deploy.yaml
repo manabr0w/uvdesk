@@ -5,7 +5,7 @@ metadata:
   labels:
     app: uvdesk
 spec:
-  replicas: 5
+  replicas: 1
   selector:
     matchLabels:
       app: uvdesk
