@@ -5,7 +5,7 @@ pipeline {
         COMPOSER_ALLOW_SUPERUSER = 1
         COMPOSER_NO_INTERACTION = 1
         DOCKER_CREDENTIALS = credentials('docker-hub-credentials')
-        IMAGE_NAME = 'your_dockerhub_username/uvdesk'
+        IMAGE_NAME = 'maksfed31/uvdeskbeta'
     }
 
     stages {
