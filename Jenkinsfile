@@ -4,24 +4,18 @@ pipeline {
     environment {
         COMPOSER_ALLOW_SUPERUSER = 1
         COMPOSER_NO_INTERACTION = 1
-        GITHUB_REPO = 'manabr0w/uvdesk'
         GITHUB_TOKEN = credentials('GITHUB_TOKEN')
         IMAGE_NAME = 'maksfed31/uvdeskbeta'
-        DOCKER_USER = credentials('DOCKERHUB_USERNAME')
-        DOCKER_PASS = credentials('DOCKERHUB_PASSWORD')
-
-
     }
 
-    stages{
+    stages {
         stage("Checkout") {
             steps {
-                git branch: 'main', url: 'https://github.com/manabr0w/uvdesk', credentialsId: 'GITHUB_TOKEN'
+                git branch: 'main', url: "https://github.com/manabr0w/uvdesk.git", credentialsId: 'GITHUB_TOKEN'
             }
-
         }
 
-        stage("Setup envirement") {
+        stage("Setup Environment") {
             steps {
                 sh '''
                 echo "Checking PHP and Composer..."
@@ -31,6 +25,7 @@ pipeline {
                     sudo apt-get update && sudo apt-get install -y php php-cli php-mbstring php-xml php-zip php-curl bash
                 fi
 
+                # Встановлення Composer
                 if ! command -v composer > /dev/null; then
                     echo "Installing Composer..."
                     curl -sS https://getcomposer.org/installer | php
@@ -47,7 +42,7 @@ pipeline {
             }
         }
 
-        stage("Install dependencies") {
+        stage("Install Dependencies") {
             steps {
                 sh '''
                 echo "Installing dependencies..."
@@ -66,50 +61,47 @@ pipeline {
         }
 
         stage("Docker Login") {
+            environment {
+                DOCKER_CREDENTIALS = credentials('DOCKERHUB_CREDENTIALS')
+            }
             steps {
                 sh '''
                 echo "Logging in to DockerHub..."
-                echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                echo $DOCKER_CREDENTIALS_PSW | docker login -u $DOCKER_CREDENTIALS_USR --password-stdin
                 '''
             }
+        }
 
-        stage("Build docker image"){
+        stage("Build Docker Image") {
             steps {
-                dir('/var/www/html'){
-                    sh '''
-                    echo "Building Docker image..."
-                    docker build -t ${IMAGE_NAME}:latest .
-                    '''
-                }
+                sh '''
+                echo "Building Docker image..."
+                docker build -t ${IMAGE_NAME}:latest .
+                '''
             }
         }
 
         stage("Push to DockerHub") {
             steps {
                 sh '''
-                echo "Logging in to DockerHub..."
-                echo "${DOCKER_CREDENTIALS_USR}" | docker login -u "${DOCKER_CREDENTIALS_USR}" --password-stdin
-
                 echo "Pushing image to DockerHub..."
                 docker push ${IMAGE_NAME}:latest
                 '''
             }
         }
-
     }
 
-    post{
+    post {
         always {
-            echo "Pipline finished"
+            echo "Pipeline finished"
         }
 
         success {
-            echo "SUCCES"
+            echo "SUCCESS"
         }
 
         failure {
             echo "CI failed"
         }
     }
-}
 }
