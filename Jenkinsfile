@@ -4,7 +4,6 @@ pipeline {
     environment {
         COMPOSER_ALLOW_SUPERUSER = 1
         COMPOSER_NO_INTERACTION = 1
-        GITHUB_REPO = 'manabr0w/uvdesk'
         DOCKER_CREDENTIALS = credentials('docker-hub-credentials')
         IMAGE_NAME = 'your_dockerhub_username/uvdesk'
     }
@@ -12,7 +11,7 @@ pipeline {
     stages {
         stage("Checkout") {
             steps {
-                git branch: 'main', url: "https://github.com/${GITHUB_REPO}.git", credentialsId: 'GITHUB_TOKEN'
+                git branch: 'main', url: "https://github.com/manabr0w/uvdesk.git", credentialsId: 'GITHUB_TOKEN'
             }
         }
 
@@ -21,20 +20,17 @@ pipeline {
                 sh '''
                 echo "Checking PHP and Composer..."
 
-                # Перевірка PHP
                 if ! command -v php > /dev/null; then
                     echo "Installing PHP..."
                     sudo apt-get update && sudo apt-get install -y php php-cli php-mbstring php-xml php-zip php-curl bash
                 fi
 
-                # Перевірка Composer
                 if ! command -v composer > /dev/null; then
                     echo "Installing Composer..."
                     curl -sS https://getcomposer.org/installer | php
                     sudo mv composer.phar /usr/local/bin/composer
                 fi
 
-                # Перевірка Docker
                 if ! command -v docker > /dev/null; then
                     echo "Installing Docker..."
                     sudo apt-get update && sudo apt-get install -y docker.io
