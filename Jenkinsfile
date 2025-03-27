@@ -47,7 +47,7 @@ pipeline {
             steps{
                 sh '''
                 echo "Running linter..."
-                cd /var/www/html
+                sudo cd /var/www/html
                 vendor/bin/php-cs-fixer fix --dry-run --diff
                 '''
             }
