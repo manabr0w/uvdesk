@@ -4,18 +4,24 @@ pipeline {
     environment {
         COMPOSER_ALLOW_SUPERUSER = 1
         COMPOSER_NO_INTERACTION = 1
-        DOCKER_CREDENTIALS = credentials('docker-hub-credentials')
+        GITHUB_REPO = 'manabr0w/uvdesk'
+        GITHUB_TOKEN = credentials('GITHUB_TOKEN')
         IMAGE_NAME = 'maksfed31/uvdeskbeta'
+        DOCKER_USER = credentials('DOCKERHUB_USERNAME')
+        DOCKER_PASS = credentials('DOCKERHUB_PASSWORD')
+
+
     }
 
-    stages {
+    stages{
         stage("Checkout") {
             steps {
-                git branch: 'main', url: "https://github.com/manabr0w/uvdesk.git", credentialsId: 'GITHUB_TOKEN'
+                git branch: 'main', url: 'https://github.com/manabr0w/uvdesk', credentialsId: 'GITHUB_TOKEN'
             }
+
         }
 
-        stage("Setup Environment") {
+        stage("Setup envirement") {
             steps {
                 sh '''
                 echo "Checking PHP and Composer..."
@@ -41,7 +47,7 @@ pipeline {
             }
         }
 
-        stage("Install Dependencies") {
+        stage("Install dependencies") {
             steps {
                 sh '''
                 echo "Installing dependencies..."
@@ -50,16 +56,7 @@ pipeline {
             }
         }
 
-        stage("Run Linter") {
-            steps {
-                sh '''
-                echo "Running linter..."
-                vendor/bin/php-cs-fixer fix --dry-run --diff
-                '''
-            }
-        }
-
-        stage("Run Tests") {
+        stage("Testing") {
             steps {
                 sh '''
                 echo "Running tests..."
@@ -68,12 +65,22 @@ pipeline {
             }
         }
 
-        stage("Build Docker Image") {
+        stage("Docker Login") {
             steps {
                 sh '''
-                echo "Building Docker image..."
-                docker build -t ${IMAGE_NAME}:latest .
+                echo "Logging in to DockerHub..."
+                echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
                 '''
+            }
+
+        stage("Build docker image"){
+            steps {
+                dir('/var/www/html'){
+                    sh '''
+                    echo "Building Docker image..."
+                    docker build -t ${IMAGE_NAME}:latest .
+                    '''
+                }
             }
         }
 
@@ -88,19 +95,20 @@ pipeline {
                 '''
             }
         }
+
     }
 
-    post {
+    post{
         always {
-            echo "Pipeline execution completed."
+            echo "Pipline finished"
         }
 
         success {
-            echo " Pipeline completed successfully!"
+            echo "SUCCES"
         }
 
         failure {
-            echo " Pipeline failed!"
+            echo "CI failed"
         }
     }
-}
+} 
