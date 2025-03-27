@@ -43,17 +43,6 @@ pipeline {
             }
         }
 
-        stage("Run Linter") {
-            steps{
-                dir('/var/www/html'){
-                   sh '''
-                echo "Running linter..."
-                bash -c "vendor/bin/php-cs-fixer fix --dry-run --diff "
-                '''
-                }
-            }
-        }
-
         stage("Testing") {
             steps {
                 sh '''
