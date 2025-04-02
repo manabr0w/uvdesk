@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-config
+data:
+  init.sql: |
+    CREATE USER 'uvdeskUser'@'%' IDENTIFIED BY 'root';
+    GRANT ALL PRIVILEGES ON *.* TO 'uvdeskUser''@'%';
+    FLUSH PRIVILEGES;
