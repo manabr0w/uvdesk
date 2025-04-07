@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.db.name }}-deploy
+  labels:
+    app: {{ .Values.db.name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.db.name }}
+  replicas: {{ .Values.db.replicas }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.db.name }}
+    spec:
+      containers:
+        - name: {{ .Values.db.name }}
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "root"
+            - name: MYSQL_DATABASE
+              value: "uvdesk"
+            - name: MYSQL_USER
+              value: "uvdeskUser"
+            - name: MYSQL_PASSWORD
+              value: "root"
+          ports:
+            - containerPort: 3306
+              name: {{ .Values.db.name }}
+          volumeMounts:
+            - name: {{ .Values.db.name }}-persistent-storage
+              mountPath: /var/lib/mysql
+            - name: {{ .Values.db.name }}-init-volume
+              mountPath: /docker-entrypoint-initdb.d
+          readinessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+      volumes:
+        - name: {{ .Values.db.name }}-persistent-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.db.name }}-pv-claim
+        - name: {{ .Values.db.name }}-init-volume
+          configMap:
+            name: {{ .Values.db.name }}-init-config
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.db.name }}-service
+spec:
+  selector:
+    app: {{ .Values.db.name }}
+  ports:
+  - port: 3306
+    targetPort: 3306
+  type: ClusterIP

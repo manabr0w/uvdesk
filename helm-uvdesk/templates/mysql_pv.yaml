@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.db.name }}-pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: {{ .Values.db.storage.classname }}
+  capacity:
+    storage: {{ .Values.db.size.storage }}
+  accessModes:
+    - {{ .Values.db.acces.mode }}
+  hostPath: 
+    path: {{ .Values.db.mount.path }}
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.db.name }}-pv-claim
+spec:
+  storageClassName: {{ .Values.db.storage.classname }}
+  accessModes:
+    - {{ .Values.db.acces.mode }}
+  resources:
+    requests:
+      storage: {{ .Values.db.size.storage }}

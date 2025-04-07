@@ -1,0 +1,15 @@
+app:
+  name: uvdesk
+  replicas: 1
+
+db:
+  name: mysql
+  replicas: 1
+  mount:
+    path: "/mnt/data"
+  size:
+    storage: 5Gi
+  acces:
+    mode: ReadWriteOnce
+  storage:
+    classname: "manual"
