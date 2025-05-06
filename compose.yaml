@@ -1,6 +1,6 @@
 services:
   web:
-    image: stableuvdesk
+    image: maksfed31/uvdeskbeta:latest
     ports:
       - "8888:80"
     environment:
