@@ -1,0 +1,3 @@
+<?php //App%255CController%255CImageCache%255CImageCacheController
+
+return [PHP_INT_MAX, []];
