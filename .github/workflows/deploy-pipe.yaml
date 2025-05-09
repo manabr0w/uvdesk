@@ -1,0 +1,42 @@
+name: Deploy artifact to S3
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Крок 1: Checkout коду
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Крок 2: Встановлення PHP та Composer
+      - name: Set up PHP with Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      # Крок 3: Встановлення залежностей
+      - name: Install dependencies
+        run: composer install
+
+      # Крок 4: Створення ZIP архіву
+      - name: Create zip archive
+        run: |
+          zip -r app.zip .
+
+      - name: Upload to S3
+        uses: jakejarvis/s3-sync-action@v0.5.1
+        with:
+          args: --acl public-read --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: "php-deploy-storage"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'eu-north-1'
+          SOURCE_DIR: '.'
+          DEST_DIR: 'deployments'
