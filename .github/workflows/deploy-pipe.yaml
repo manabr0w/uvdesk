@@ -34,3 +34,4 @@ jobs:
           AWS_REGION: 'eu-north-1'
           SOURCE_DIR: '.'
           DEST_DIR: 'deployments'
+##finish
