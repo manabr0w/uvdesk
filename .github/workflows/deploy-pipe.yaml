@@ -19,16 +19,18 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+          extensions: mbstring, mailparse
 
       # Крок 3: Встановлення залежностей
       - name: Install dependencies
         run: composer install
 
-      # Крок 4: Створення ZIP архіву
+      # Крок 4: Створення ZIP архіву (без службових папок)
       - name: Create zip archive
         run: |
-          zip -r app.zip .
+          zip -r app.zip . -x ".git/*" ".github/*"
 
+      # Крок 5: Завантаження архіву на S3
       - name: Upload to S3
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
