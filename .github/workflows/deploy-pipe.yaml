@@ -19,16 +19,6 @@ jobs:
           php-version: '8.2'
           extensions: mbstring
 
-      - name: Install mailparse PHP extension
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y php-pear php-dev libmagic-dev
-          sudo pecl install mailparse
-          echo "extension=mailparse.so" | sudo tee -a /etc/php/8.2/cli/php.ini
-
-      - name: Install dependencies
-        run: composer install
-
       - name: Create zip archive
         run: |
           zip -r app.zip . -x ".git/*" ".github/*"
